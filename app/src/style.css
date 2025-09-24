@@ -1,0 +1,114 @@
+:root {
+  --grey1: #eeeeee;
+  --grey2: #777777;
+  --grey3: #555555;
+  --grey4: #111111;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-decoration: none;
+}
+
+html {
+  font-size: 62.5%;
+  font-family: "roboto", sans-serif;
+  font-weight: 400;
+  color: var(--grey4);
+  background-color: #ffffff;
+}
+
+#app {
+  font-size: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+h1 {
+  font-size: 3.2rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  color: var(--grey2);
+}
+
+hr {
+  margin-top: 1rem;
+  border: none;
+  width: 75%;
+  height: 0.1rem;
+  background-color: var(--grey1);
+}
+
+a {
+  color: var(--grey3);
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--grey4);
+}
+
+a:active {
+  text-decoration: underline;
+  color: var(--grey3);
+}
+
+p {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  color: var(--grey2);
+}
+
+form {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+input {
+  border: solid;
+  height: 2.2rem;
+  font-size: 1.8rem;
+  padding-left: 0.5rem;
+  border-width: 0.2rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+select {
+  border: solid;
+  height: 2.5rem;
+  font-size: 1.2rem;
+  padding-left: 0.5rem;
+  border-width: 0.2rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  background-color: var(--grey4);
+  color: white;
+  border: solid;
+  border-color: grey;
+  border-width: 0.2rem;
+  height: 2.5rem;
+  font-size: 1.6rem;
+  border-radius: 0.5rem;
+  padding: 0.2rem;
+  width: fit-content;
+}
+
+button:hover {
+  background-color: var(--grey3);
+}
+
+button:active {
+  background-color: var(--grey4);
+}

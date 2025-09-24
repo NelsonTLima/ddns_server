@@ -1,0 +1,107 @@
+name: ddns_server
+
+networks:
+  internal:
+  bridge:
+    external: true
+
+volumes:
+  pgdata: {}
+
+services:
+
+  proxy:
+    container_name: ddns_proxy
+    image: nelsontlima/ddns_proxy:prod
+    networks: [internal]
+    ports: ["80:80", "443:443"]
+    restart: unless-stopped
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    environment:
+      DOMAIN: ${DOMAIN}
+      APP_PORT: "80"
+      WS_BLOCK: ""
+    volumes:
+      - ./proxy/ssl/certs/${DOMAIN}.crt:/etc/ssl/certs/${DOMAIN}.crt:ro
+      - ./proxy/ssl/private/${DOMAIN}.key:/etc/ssl/private/${DOMAIN}.key:ro
+  
+  app:
+    container_name: ddns_app
+    image: nelsontlima/ddns_app:prod
+    networks: [internal]
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+      target: prod
+    environment:
+      - VITE_DOMAIN=${DOMAIN}
+
+  api:
+    container_name: ddns_api
+    image: nelsontlima/ddns_api:prod
+    networks: [internal]
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      target: prod
+    environment:
+      - DOMAIN=${DOMAIN}
+      - CF_PROXY=${CF_PROXY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGDATABASE=ddns_db
+      - SESSION_SECRET=${SESSION_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+
+  workers:
+    container_name: ddns_workers
+    image: nelsontlima/ddns_workers:prod
+    networks: [internal]
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: workers/Dockerfile
+      target: prod
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGDATABASE=ddns_db
+      - SESSION_SECRET=${SESSION_SECRET}
+      - CF_KEY=${CF_KEY}
+      - CF_EMAIL=${CF_EMAIL}
+      - CF_ZONE_ID=${CF_ZONE_ID}
+
+  postgres:
+    container_name: ddns_db
+    image: nelsontlima/ddns_db:prod 
+    networks: [internal]
+    restart: unless-stopped
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${PGUSER}
+      - POSTGRES_PASSWORD=${PGPASSWORD}
+      - POSTGRES_DB=ddns_db
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+      - POSTGRES_INITDB_ARGS= "--auth-local=password"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    container_name: ddns_cache
+    image: redis:alpine
+    networks: [internal]
+    restart: unless-stopped

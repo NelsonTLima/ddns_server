@@ -1,0 +1,23 @@
+{
+  "name": "ddns_server",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "api",
+    "app",
+    "workers",
+    "shared/*"
+  ],
+  "scripts": {
+    "dev": "docker compose -f dev.docker-compose.yaml up -d --build",
+    "dev:down": "docker compose -f dev.docker-compose.yaml down",
+    "prod": "docker compose up -d --build",
+    "down": "docker compose down",
+    "build": "docker compose build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

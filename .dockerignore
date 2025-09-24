@@ -1,0 +1,32 @@
+# Secretes
+.env
+.env.*
+
+# Notes
+.md
+
+# Git
+.git/
+.gitignore
+
+# IDE
+*/.vscode/
+*/.idea/
+
+# Os trash
+**/.DS_Store
+
+# Docker
+**/Dockerfile
+docker-compose.yaml
+
+# Test
+*/coverage/
+*/test
+
+# LSP and Linters
+**/eslint.config.js
+
+# Node
+**/node_modules/
+*/dist/
