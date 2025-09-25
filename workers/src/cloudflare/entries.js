@@ -19,7 +19,7 @@ export class Patch {
     this.content = {
       id: id,
       content: content,
-      proxy: proxy,
+      proxied: proxy,
       type: type
     };
   }
