@@ -2,7 +2,7 @@ name: ddns_server
 
 networks:
   internal:
-  bridge:
+  proxy_bus:
     external: true
 
 volumes:
@@ -11,10 +11,10 @@ volumes:
 services:
 
   proxy:
-    container_name: ddns_proxy
+    container_name: ddns_server_proxy
     image: nelsontlima/ddns_proxy:prod
-    networks: [internal]
-    ports: ["80:80", "443:443"]
+    networks: [internal, proxy_bus]
+    ports: ["80", "443"]
     restart: unless-stopped
     build:
       context: ./proxy

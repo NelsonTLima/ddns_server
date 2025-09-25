@@ -3,7 +3,18 @@ server {
   listen 80;
   server_name ${DOMAIN};
 
-  return 301 https://${DOMAIN}$request_uri;
+  location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    ${WS_BLOCK} 
+    proxy_pass http://ddns_app:${APP_PORT};
+  }
+
+  location /api/ {
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_pass http://ddns_api:3000/;
+  }
 }
 
 
@@ -15,9 +26,7 @@ server {
   ssl_certificate_key /etc/ssl/private/${DOMAIN}.key;
   
   location / {
-
     proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     ${WS_BLOCK} 
     proxy_pass http://ddns_app:${APP_PORT};
@@ -25,7 +34,6 @@ server {
 
   location /api/ {
     proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_pass http://ddns_api:3000/;
   }
