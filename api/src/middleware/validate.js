@@ -46,12 +46,15 @@ async function sync(req, res, next) {
   const sync_session = req.body.sync_session;
   if (!sync_session) return next();
   
-  let content = undefined;
+  var content = undefined;
   if (req.headers['cf-connecting-ip']) {
+    console.log('cloudflare');
     content = req.headers['cf-connecting-ip'];
   }
   else {
-    content = req.headers['x-real-ip'];
+    console.log('not cloudflare');
+    content = req.headers['x-forwarded-for'].split(',')[0].trim();
+    console.log(content);
   }
   req.body.ip = content;
 
