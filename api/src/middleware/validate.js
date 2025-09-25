@@ -43,6 +43,13 @@ function update(req, res, next) {
 }
 
 async function sync(req, res, next) {
+  
+  if (req.headers['cf-connecting-ip']) {
+    req.ip = req.headers['cf-connecting-ip'];
+  }
+  else {
+    req.ip = req.headers['x-real-ip']
+  }
   const sync_session = req.body.sync_session;
   
   let cache_data = undefined;
@@ -54,7 +61,7 @@ async function sync(req, res, next) {
 
   if (cache_data === str_body) {
     const new_cache = req.body;
-    new_cache.ip = req.headers["x-real-ip"]
+    new_cache.ip = req.ip;
     cache.sync(sync_session, req.body);
     return res.notModified();
   }

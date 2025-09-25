@@ -168,7 +168,7 @@ async function update(req, res) {
 
 
 async function sync(req, res) {
-  const content = req.headers["x-real-ip"];
+  const content = req.ip;
 
   let actual_records = await db.getNamesByUserId(req.auth.userId);
 
@@ -187,7 +187,6 @@ async function sync(req, res) {
 
     if (await cache.hasJob('patch', name)) continue
     if (content == oldContent && proxy == oldProxy) {
-      console.log('same contant and proxy');
       continue;
     }
     
@@ -204,7 +203,7 @@ async function sync(req, res) {
   const sync_session = randomBytes(32).toString("hex");
   req.body.sync_session = sync_session;
 
-  req.body.ip = req.headers['x-real-ip'];
+  req.body.ip = req.ip;
   cache.sync(sync_session, req.body);
   
   res.success({
