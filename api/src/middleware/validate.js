@@ -43,12 +43,12 @@ function update(req, res, next) {
 }
 
 async function sync(req, res, next) {
-  
+  let ip = undefined; 
   if (req.headers['cf-connecting-ip']) {
-    req.ip = req.headers['cf-connecting-ip'];
+    ip = req.headers['cf-connecting-ip'];
   }
   else {
-    req.ip = req.headers['x-real-ip']
+    ip = req.headers['x-real-ip'];
   }
   const sync_session = req.body.sync_session;
   
@@ -61,10 +61,11 @@ async function sync(req, res, next) {
 
   if (cache_data === str_body) {
     const new_cache = req.body;
-    new_cache.ip = req.ip;
+    new_cache.ip = ip;
     cache.sync(sync_session, req.body);
     return res.notModified();
   }
+  req.body.ip = ip;
   next();
 }
 
