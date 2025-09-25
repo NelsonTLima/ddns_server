@@ -10,11 +10,17 @@ export class Deletion {
 
 export class Patch {
   constructor(id, content, proxy) {
+    let type = 'CNAME'
+    if (validator.isIP(content, 4)){
+       type = 'A';
+    } else if (validator.isIP(content, 6)) {
+       type = 'AAAA'
+    }
     this.content = {
       id: id,
       content: content,
       proxy: proxy,
-      type: "A"
+      type: type
     };
   }
 }
