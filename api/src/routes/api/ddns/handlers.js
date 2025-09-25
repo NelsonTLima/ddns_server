@@ -168,10 +168,9 @@ async function update(req, res) {
 
 
 async function sync(req, res) {
-  const content = req.body.ip;
+  let content = req.body.ip;
 
   let actual_records = await db.getNamesByUserId(req.auth.userId);
-
   let requested_records = req.body.domains.sort(
     (a, b) => a.name.localeCompare(b.name)
   );
@@ -202,9 +201,9 @@ async function sync(req, res) {
 
   const sync_session = randomBytes(32).toString("hex");
   req.body.sync_session = sync_session;
-  cache.sync(sync_session, req.body);
+  await cache.sync(sync_session, req.body);
   
-  res.success({
+  return res.success({
     sync_session: sync_session,
   });
 }

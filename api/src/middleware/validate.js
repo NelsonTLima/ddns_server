@@ -43,27 +43,26 @@ function update(req, res, next) {
 }
 
 async function sync(req, res, next) {
-  let content = undefined; 
+  const sync_session = req.body.sync_session;
+  if (!sync_session) return next();
+  
+  let content = undefined;
   if (req.headers['cf-connecting-ip']) {
     content = req.headers['cf-connecting-ip'];
   }
   else {
     content = req.headers['x-real-ip'];
   }
-  const sync_session = req.body.sync_session;
-  
-  let cache_data = undefined;
-  if (sync_session && sync_session != null) {
-    cache_data = await cache.getSync(sync_session);
-  }
-  
-  const str_body = JSON.stringify(req.body);
+  req.body.ip = content;
 
-  req.body.ip = content
-  if (cache_data === str_body) {
-    cache.sync(sync_session, req.body);
+  let str_req = JSON.stringify(req.body);
+  let str_cache = await cache.getSync(sync_session);
+  
+  if (str_req === str_cache) {
+    await cache.sync(sync_session, req.body);
     return res.notModified();
   }
+
   next();
 }
 
