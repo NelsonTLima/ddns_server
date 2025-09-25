@@ -10,14 +10,17 @@ export class Deletion {
 
 export class Patch {
   constructor(id, content, proxy) {
-    console.log('chegou aqui');
-    
-    console.log("definiu o type");
+    let type = 'CNAME'
+    if (validator.isIP(content, 4)){
+       type = 'A';
+    } else if (validator.isIP(content, 6)) {
+       type = 'AAAA'
+    }
     this.content = {
       id: id,
       content: content,
       proxied: proxy,
-      type: 'A'
+      type: type
     };
     console.log(this.content);
   }
