@@ -43,9 +43,6 @@ function update(req, res, next) {
 }
 
 async function sync(req, res, next) {
-  const sync_session = req.body.sync_session;
-  if (!sync_session) return next();
-  
   var content = undefined;
   if (req.headers['cf-connecting-ip']) {
     content = req.headers['cf-connecting-ip'];
@@ -56,6 +53,9 @@ async function sync(req, res, next) {
   }
   req.body.ip = content;
 
+  const sync_session = req.body.sync_session;
+  if (!sync_session) return next();
+  
   let str_req = JSON.stringify(req.body);
   let str_cache = await cache.getSync(sync_session);
   
