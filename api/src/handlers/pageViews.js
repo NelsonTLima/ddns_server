@@ -1,9 +1,9 @@
-import { getPanelViewByUserId } from "#queries/db.js";
+import db from "#queries/db.js";
 
 export async function getPanel(req, res) {
   const { userId, username } = req.auth;
 
-  const view = await getPanelViewByUserId(userId);
+  const view = await db.getPanelViewByUserId(userId);
 
   const response_data = {
     user: username,
@@ -11,4 +11,8 @@ export async function getPanel(req, res) {
     records: view,
   };
   return res.status(200).json(response_data);
+}
+
+export default {
+  getPanel
 }

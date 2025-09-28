@@ -37,10 +37,9 @@
     "#queries/*": "@ddns/internal/queries/*",
     "#common/*": "@ddns/common/src/*", 
     "#config/*": "./src/config/*",
-    "#middleware/*": "./src/middleware/*",
     "#routes": "./src/routes/index.js",
-    "#api/*": "./src/routes/api/*",
-    "#pages/*": "./src/routes/pages/*",
-    "#helpers": "./src/helpers/index.js"
+    "#helpers": "./src/helpers/index.js",
+    "#handlers": "./src/handlers/index.js",
+    "#middleware/*": "./src/middleware/*"
   }
 }

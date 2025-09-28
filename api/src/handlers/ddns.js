@@ -1,4 +1,4 @@
-import { Queue, QueueEvents } from "bullmq";
+import { Queue } from "bullmq";
 import { randomBytes } from "crypto";
 import db from "#queries/db.js";
 import cache from "#queries/cache.js";
@@ -22,67 +22,8 @@ const defaultJobConfig = {
   },
 };
 
-const events = new QueueEvents("dns-records", { connection });
-await events.waitUntilReady();
 
-const waiters = new Map(); //  Map<string, Set<serverResponse>>
-
-const send = (res, event, data) => {
-  res.write(`event: ${event}\n`);
-  res.write(`data: ${JSON.stringify(data)}\n\n`);
-};
-
-events.on("completed", ({ jobId }) => {
-  const set = waiters.get(jobId);
-  if (!set || set.size === 0) return;
-  for (const res of set) {
-    send(res, "status", { jobId, status: "completed" });
-    send(res, "end", { jobId, status: "ended" });
-    res.end();
-  }
-  waiters.delete(jobId);
-});
-
-events.on("failed", ({ jobId }) => {
-  const set = waiters.get(jobId);
-  if (!set || set.size === 0) return;
-  for (const res of set) {
-    send(res, "status", { jobId, status: "failed" });
-    send(res, "end", { jobId, status: "ended" });
-    res.end();
-  }
-  waiters.delete(jobId);
-});
-
-
-async function jobStream(req, res) {
-  const jobId = String(req.query.jobId || "");
-
-  if (!jobId) return res.status(400).json({ err: "job id" });
-
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-
-  waiters.has(jobId)
-    ? waiters.get(jobId).add(res)
-    : waiters.set(jobId, new Set([res]));
-
-  const cleanup = () => {
-    const s = waiters.get(jobId);
-    if (s) {
-      s.delete(res);
-      if (s.size === 0) waiters.delete(jobId);
-    }
-    if (!res.writableEnded) res.end();
-  };
-
-  req.on("close", cleanup);
-  res.on?.("close", cleanup);
-}
-
-
-async function post(req, res) {
+export async function post(req, res) {
   const { userId, username } = req.auth;
   const { name, content, proxy } = req.body;
 
@@ -108,7 +49,7 @@ async function post(req, res) {
 }
 
 
-async function remove(req, res) {
+export async function remove(req, res) {
   const { name } = req.body;
 
   const record = await db.getRecordByName(name);
@@ -136,7 +77,7 @@ async function remove(req, res) {
 }
 
 
-async function update(req, res) {
+export async function update(req, res) {
   const { name, content } = req.body;
   // const { userId, username } = req.auth;
 
@@ -167,7 +108,7 @@ async function update(req, res) {
 }
 
 
-async function sync(req, res) {
+export async function sync(req, res) {
   let content = req.body.ip;
 
   let actual_records = await db.getNamesByUserId(req.auth.userId);
@@ -208,4 +149,9 @@ async function sync(req, res) {
   });
 }
 
-export default { post, remove, update, sync, jobStream };
+export default {
+  post,
+  remove,
+  update,
+  sync
+};
