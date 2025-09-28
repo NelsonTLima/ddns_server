@@ -4,6 +4,7 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
+    "dev": "nodemon -w . -w ../shared --exec 'node ./main.js'",
     "lint": "eslint . --fix",
     "format": "prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"

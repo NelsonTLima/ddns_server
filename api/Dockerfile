@@ -17,7 +17,7 @@ ENV NODE_ENV=dev
 
 WORKDIR /repo/api
 
-CMD ["npx", "nodemon", "main.js"]
+CMD ["npm", "run", "dev"]
 
 
 FROM base AS prod-deps
