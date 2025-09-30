@@ -2,15 +2,49 @@
   "name": "@ddns/common",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": {
+        "import": "./src/index.ts"
+      },
+      "production": {
+        "import": "./dist/index.js"
+      },
+      "default": {
+        "import": "./src/index.js"
+      }
+    },
+    "./validations": {
+      "development": {
+        "import": "./src/validations.ts"
+      },
+      "production": {
+        "import": "./dist/validations.js"
+      },
+      "default": {
+        "import": "./src/validations.js"
+      }
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "build": "tsc --noEmitOnError",
+    "lint": "eslint . --fix",
+    "format": "prettier . --write",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
-    "bogon": "^1.1.0"
+    "bogon": "^1.1.0",
+    "validator": "^13.15.15"
+  },
+  "devDependencies": {
+    "@types/bogon": "^1.0.2",
+    "@types/validator": "^13.15.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
   }
 }

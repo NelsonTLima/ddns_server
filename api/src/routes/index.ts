@@ -69,4 +69,5 @@ router.post("/ddns/sync",
   handle.sync
 );
 
+// GET /test
 export default router;

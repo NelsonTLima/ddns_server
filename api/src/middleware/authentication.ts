@@ -1,11 +1,15 @@
-import { getUserByName } from "#queries/db.js";
+import type { Request, Response, NextFunction} from 'express';
+import { getUserByName } from "@ddns/internal/queries/db";
 import bcrypt from "bcrypt";
 
-export async function authenticate(req, res, next) {
-  if (req.session?.userId) {
+export async function authenticate(req: Request,res: Response, next: NextFunction) {
+  console.log('hello')
+  if (req.session?.user_id) {
+    if (!req.session.username || !req.session.user_id)
+      throw new Error("user name and id is required.");
     req.auth = {
       username: req.session.username,
-      userId: req.session.userId,
+      user_id: req.session.user_id,
       method: "session",
     };
     return next();
@@ -28,7 +32,7 @@ export async function authenticate(req, res, next) {
 
   req.auth = {
     username: user.name,
-    userId: user.id,
+    user_id: user.id,
     method: "token",
   };
   return next();

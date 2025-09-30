@@ -4,7 +4,7 @@ import postgres from "pg";
 const pg = new postgres.Pool();
 
 
-export async function getUserByName(username) {
+export async function getUserByName(username: string) {
   const result = await pg.query("SELECT * FROM users WHERE name = $1", [
     username,
   ]);
@@ -14,15 +14,15 @@ export async function getUserByName(username) {
 }
 
 
-export async function updateTokenHashByUserId(hash, userId) {
+export async function updateTokenHashByUserId(hash: string, user_id: number) {
   return await pg.query("UPDATE users SET token_hash = $1 WHERE id = $2;", [
     hash,
-    userId,
+    user_id,
   ]);
 }
 
 
-export async function getPanelViewByUserId(user_id) {
+export async function getPanelViewByUserId(user_id: number) {
   const res = await pg.query(
     "SELECT * FROM user_panel_view WHERE user_id = $1",
     [user_id],
@@ -31,27 +31,27 @@ export async function getPanelViewByUserId(user_id) {
 }
 
 
-export async function getRecordByName(name) {
+export async function getRecordByName(name: string) {
   const res = await pg.query("SELECT * FROM records WHERE name = $1", [name]);
   if (res.rowCount == 0) return null;
   return res.rows[0];
 }
 
 
-export async function isNameInRecords(name) {
+export async function isNameInRecords(name: string) {
   const rows = await getRecordByName(name);
   return rows !== null;
 }
 
 
 export async function insertPostRecord(
-  user_id,
-  cloudflare_id,
-  name,
-  content,
-  proxied,
-  created_on,
-  modified_on,
+  user_id: number,
+  cloudflare_id: string,
+  name: string,
+  content: string,
+  proxied: boolean,
+  created_on: string,
+  modified_on: string,
 ) {
   return await pg.query(
     `
@@ -70,7 +70,7 @@ export async function insertPostRecord(
 }
 
 
-export async function deleteRecordById(id) {
+export async function deleteRecordById(id: number) {
   const result = await pg.query(
     `
       DELETE FROM records WHERE cloudflare_id = $1;
@@ -81,7 +81,7 @@ export async function deleteRecordById(id) {
 }
 
 
-export async function changeRecordContent(id, content) {
+export async function changeRecordContent(id: number, content: string) {
   console.log(id);
   console.log(content);
   const result = await pg.query(
@@ -94,9 +94,9 @@ export async function changeRecordContent(id, content) {
 }
 
 
-export async function getNamesByUserId(userid){
+export async function getNamesByUserId(user_id: number){
   const res = await pg.query(
-    `SELECT * FROM records WHERE user_id = $1 ORDER BY name`, [userid]
+    `SELECT * FROM records WHERE user_id = $1 ORDER BY name`, [user_id]
   );
   return res.rows
 }

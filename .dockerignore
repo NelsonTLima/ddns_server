@@ -29,4 +29,5 @@ docker-compose.yaml
 
 # Node
 **/node_modules/
-*/dist/
+**/dist/
+*.log

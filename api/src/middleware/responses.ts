@@ -1,9 +1,11 @@
-export function responseMethods(_, res, next) {
-  res.success = function (data = undefined) {
+import type { Request, Response, NextFunction } from 'express';
+
+export function responseMethods(_req: Request, res: Response, next: NextFunction) {
+  res.success = function <T = unknown>(this: Response, data?: T) {
     return this.status(200).json({ status: "ok", data: data });
   };
 
-  res.error = function (message) {
+  res.error = function (message: string) {
     return this.status(400).json({ status: "error", message });
   };
 

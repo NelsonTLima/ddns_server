@@ -1,3 +1,4 @@
+# ------ Stage: COPY manifests ----
 FROM node:lts-alpine AS base
 
 WORKDIR /repo
@@ -7,32 +8,58 @@ COPY api/package.json api/
 COPY shared/common/package.json shared/common/
 COPY shared/internal/package.json shared/internal/
 
+# ------ Stage: Installing dev dependencies 
 FROM base AS dev-deps
 
 RUN npm ci --workspaces
 
+# ----- Target 1: Run Dev -----------
 FROM dev-deps AS dev
 
-ENV NODE_ENV=dev
+ENV NODE_ENV=development
+ENV NODE_OPTIONS=--conditions=development
 
 WORKDIR /repo/api
 
 CMD ["npm", "run", "dev"]
 
 
+# -------Stage: Build -----------
+FROM dev-deps AS build
+
+WORKDIR /repo
+
+COPY ./api /repo/api
+COPY ./shared /repo/shared
+
+RUN npm run -ws build
+
+# ----- Stage: Install Prod Dependencies
 FROM base AS prod-deps
 
-RUN npm ci --workspace=@ddns/api --omit=dev
+RUN npm ci --workspaces --omit=dev
 
-FROM prod-deps AS prod
+# -------Target 2: PROD  ------------
+FROM node:lts-alpine AS prod
 
-ENV NODE_ENV=prod
+ENV NODE_ENV=production
+ENV NODE_OPTIONS=--conditions=production
+
+COPY --from=prod-deps /repo/node_modules /repo/node_modules
+
+COPY --from=build /repo/api/dist /repo/api/dist
+COPY --from=build /repo/api/package.json /repo/api/package.json
+
+
+COPY --from=build /repo/shared/common/dist /repo/shared/common/dist
+COPY --from=build /repo/shared/common/package.json /repo/shared/common/package.json 
+
+COPY --from=build /repo/shared/internal/dist /repo/shared/internal/dist
+COPY --from=build /repo/shared/internal/package.json /repo/shared/internal/package.json
 
 WORKDIR /repo/api
 
-COPY ./api /repo/api/
-COPY ./shared /repo/shared/
-
 EXPOSE 3000
 
-CMD ["node", "main.js"]
+# CMD ["sleep", "infinity"] # debug
+CMD ["npm", "run", "start"]

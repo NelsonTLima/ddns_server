@@ -1,18 +1,28 @@
+import type { RedisOptions } from 'ioredis';
+import type { Request, Response } from 'express';
 import { QueueEvents } from 'bullmq'; 
 
 
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+
+if (!REDIS_HOST) throw new Error("REDIS_HOST is required ");
+if (!REDIS_PORT) throw new Error("REDIS_PORT is required ");
+
+const port = parseInt(REDIS_PORT, 10);
+
 const connection = {
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  db: 1,
-};
+  host: REDIS_HOST || "127.0.0.1",
+  port: port || 6379 ,
+  db: 1
+} satisfies RedisOptions;
 
 const events = new QueueEvents("dns-records", { connection });
 await events.waitUntilReady();
 
 const waiters = new Map(); //  Map<string, Set<serverResponse>>
 
-const send = (res, event, data) => {
+const send = (res:  Response, event: string, data: unknown): void => {
   res.write(`event: ${event}\n`);
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 };
@@ -40,7 +50,7 @@ events.on("failed", ({ jobId }) => {
 });
 
 
-export async function stream(req, res) {
+export function stream(req: Request, res: Response) {
   const jobId = String(req.query.jobId || "");
 
   if (!jobId) return res.status(400).json({ err: "job id" });
@@ -64,4 +74,5 @@ export async function stream(req, res) {
 
   req.on("close", cleanup);
   res.on?.("close", cleanup);
+  return;
 }

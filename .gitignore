@@ -33,6 +33,9 @@ coverage/
 # Rust
 target/
 
+# TS
+tsconfig.tsbuildinfo
+
 # Editors / IDEs
 *.swp
 *.swo

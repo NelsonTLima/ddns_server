@@ -1,17 +1,20 @@
-import valid from '#common/validations.js'
-import cache from "#queries/cache.js"
+import type { Request, Response, NextFunction} from 'express';
+import valid from '@ddns/common/validations'
+import cache from "@ddns/internal/queries/cache"
 
-function login(req, res, next) {
+
+function login(req: Request, res: Response, next: NextFunction) {
   const { username, password } = req.body;
+
   if (!valid.username(username) || !valid.password(password))
     return res.unauthorized();
-  next();
+  return next();
 }
 
-function post(req, res, next) {
+function post(req: Request, res: Response, next: NextFunction) {
   let { name, content, proxy } = req.body;
 
-  const invalid = [];
+  const invalid: Array<string> = [];
 
   if (!valid.proxy(proxy)) invalid.push("proxy");
   if (!valid.content(content)) invalid.push("content");
@@ -23,33 +26,26 @@ function post(req, res, next) {
       invalid_params: invalid,
     });
 
-  next();
+  return next();
 }
 
 
 // TODO: validate.remove
-function remove(req, res, next) {
-  console.log(req.body);
-  console.log(res.body);
-  next();
-}
+
 
 
 // TODO: validate.update
-function update(req, res, next) {
-  console.log(req.body);
-  console.log(res.body);
-  next();
-}
 
-async function sync(req, res, next) {
-  var content = undefined;
+
+async function sync(req: Request, res: Response, next: NextFunction) {
+  var content: string | undefined = undefined;
+
   if (req.headers['cf-connecting-ip']) {
-    content = req.headers['cf-connecting-ip'];
+    content = req.headers['cf-connecting-ip'] as string;
   }
-  else {
-    console.log('not cloudflare');
-    content = req.headers['x-forwarded-for'].split(',')[0].trim();
+  else if (req.headers['x-forwarded-for']) {
+    const xff = req.headers['x-forwarded-for'] as string;
+    content = xff.split(',')[0]?.trim();
   }
   req.body.ip = content;
 
@@ -64,13 +60,11 @@ async function sync(req, res, next) {
     return res.notModified();
   }
 
-  next();
+  return next();
 }
 
 export default {
   login,
   post,
-  remove,
-  update,
   sync,
 };

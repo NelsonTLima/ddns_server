@@ -1,17 +1,28 @@
+import type { Request, Response } from 'express';
+import type { RedisOptions } from 'ioredis'; 
 import { Queue } from "bullmq";
 import { randomBytes } from "crypto";
-import db from "#queries/db.js";
-import cache from "#queries/cache.js";
+import db from "@ddns/internal/queries/db";
+import cache from "@ddns/internal/queries/cache";
 import helper from "#helpers"
 
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+
+if (!REDIS_HOST) throw new Error("REDIS_HOST is required ");
+if (!REDIS_PORT) throw new Error("REDIS_PORT is required ");
+
+const port = parseInt(REDIS_PORT, 10);
 
 const connection = {
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  db: 1,
-};
+  host: REDIS_HOST || "127.0.0.1",
+  port: port || 6379 ,
+  db: 1
+} satisfies RedisOptions;
+
 
 const queue = new Queue("dns-records", { connection });
+
 const defaultJobConfig = {
   removeOnComplete: true,
   removeOnFail: true,
@@ -23,8 +34,8 @@ const defaultJobConfig = {
 };
 
 
-export async function post(req, res) {
-  const { userId, username } = req.auth;
+export async function post(req: Request, res: Response) {
+  const { user_id, username } = req.auth;
   const { name, content, proxy } = req.body;
 
   if (await db.isNameInRecords(name)) return res.conflict();
@@ -37,25 +48,24 @@ export async function post(req, res) {
   const jobId = randomBytes(16).toString("hex");
   const job = await queue.add(
     "post",
-    { userId, username, name, content, proxy }, // payload
-    { jobId },
-    defaultJobConfig,
+    { user_id, username, name, content, proxy }, // payload
+    { jobId, ...defaultJobConfig }
   );
 
-  res.status(202).json({
+  return res.status(202).json({
     jobId: job.id,
     stream: `/ddns/jobs/stream?jobId=${job.id}`,
   });
 }
 
 
-export async function remove(req, res) {
+export async function remove(req: Request, res: Response) {
   const { name } = req.body;
 
   const record = await db.getRecordByName(name);
   if (!record) return res.success();
 
-  if (record.user_id !== req.auth.userId) return res.unauthorized();
+  if (record.user_id !== req.auth.user_id) return res.unauthorized();
 
   if (await cache.hasJob("delete", name)) return res.conflict();
   cache.job("delete", name);
@@ -66,20 +76,19 @@ export async function remove(req, res) {
   const job = await queue.add(
     "delete",
     { id, name },
-    { jobId },
-    defaultJobConfig,
+    { jobId, ...defaultJobConfig },
   );
 
-  res.status(202).json({
+  return res.status(202).json({
     jobId: job.id,
     stream: `/ddns/jobs/stream?jobId=${job.id}`,
   });
 }
 
 
-export async function update(req, res) {
+export async function update(req: Request, res: Response) {
   const { name, content } = req.body;
-  // const { userId, username } = req.auth;
+  // const { user_id, username } = req.auth;
 
   const record = await db.getRecordByName(name);
 
@@ -87,7 +96,7 @@ export async function update(req, res) {
   if (!record) return res.notFound();
 
   if (record.content === content) return res.success();
-  //if (record.user_id !== req.auth.userId) return res.unauthorized();
+  //if (record.user_id !== req.auth.user_id) return res.unauthorized();
 
   if (await cache.hasJob("patch", name)) return res.conflict();
   if (await cache.hasJob("delete", name)) return res.conflict();
@@ -100,20 +109,19 @@ export async function update(req, res) {
   await queue.add(
     "patch",
     { id, name, content, proxy },
-    { id },
-    defaultJobConfig,
+    defaultJobConfig
   );
 
-  res.status(200).json(req.body);
+  return res.status(200).json(req.body);
 }
 
 
-export async function sync(req, res) {
+export async function sync(req: Request, res: Response) {
   let content = req.body.ip;
 
-  let actual_records = await db.getNamesByUserId(req.auth.userId);
+  let actual_records = await db.getNamesByUserId(req.auth.user_id);
   let requested_records = req.body.domains.sort(
-    (a, b) => a.name.localeCompare(b.name)
+    (a: any, b: any) => a.name.localeCompare(b.name)
   );
 
   const updates = helper.filterUpdates(requested_records, actual_records); 
@@ -135,7 +143,6 @@ export async function sync(req, res) {
     await queue.add(
       "patch",
       { id, name, content, proxy },
-      { id },
       defaultJobConfig,
     );
   }

@@ -2,34 +2,35 @@ import validator from 'validator';
 import bogon from 'bogon';
 
 
-export function ip(content) {
-  return validator.isIP(content)
+export function ip(content: string) {
+  return validator.isIP(content);
 }
 
 
-export function isBogon(content) {
+export function isBogon(content: string) {
   return bogon(content);
 }
 
 
-export function fqdn(fqdn) {
+export function fqdn(fqdn: string) {
   return validator.isFQDN(fqdn);
 }
 
 
-export function content(content){
+export function content(content: string){
   return  validator.isIP(content, 4) ||
           validator.isIP(content, 6) ||
           validator.isFQDN(content);
 }
 
 
-export function proxy(proxy) {
+export function proxy(proxy: any) {
+  console.log("checando proxy");
   return (typeof proxy === "boolean");
 }
 
 
-export function password(password) {
+export function password(password: string) {
   const requiredChars = /[-!"#$%&'()*+,-.:;<=>?@[\]^_`{|}~]/.test(password);
   const permitedChars =
     /^[a-zA-Z0-9\-!"#$%&'()*+,-.:;<=>?@[\]^_`{|}~]{8,72}$/.test(password);
@@ -38,9 +39,8 @@ export function password(password) {
   return true;
 }
 
-
-export function username(username) {
-  if (username) return true;
+export function username(username: string): boolean {
+  return /^[a-zA-Z0-9._-]{3,32}$/.test(username);
 }
 
 
