@@ -1,6 +1,6 @@
 {
   "name": "ddns_server",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "private": true,
   "workspaces": [
@@ -13,7 +13,8 @@
     "dev": "docker compose -f dev.docker-compose.yaml up -d --build",
     "start": "docker compose up -d --build",
     "down": "docker compose down",
-    "build": "docker compose build",
+    "build": "TAG=$(git describe --tags --abbrev=0) docker compose build",
+    "build:latest": "TAG=latest docker compose build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

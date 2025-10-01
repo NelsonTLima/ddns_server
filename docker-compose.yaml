@@ -12,7 +12,7 @@ services:
 
   proxy:
     container_name: ddns_server_proxy
-    image: nelsontlima/ddns_proxy:prod
+    image: nelsontlima/ddns_proxy:${TAG}
     networks: [internal, proxy_bus]
     ports: ["80", "443"]
     restart: unless-stopped
@@ -29,7 +29,7 @@ services:
   
   app:
     container_name: ddns_app
-    image: nelsontlima/ddns_app:prod
+    image: nelsontlima/ddns_app:${TAG}
     networks: [internal]
     restart: unless-stopped
     build:
@@ -41,7 +41,7 @@ services:
 
   api:
     container_name: ddns_api
-    image: nelsontlima/ddns_api:prod
+    image: nelsontlima/ddns_api:${TAG}
     networks: [internal]
     restart: unless-stopped
     build:
@@ -63,7 +63,8 @@ services:
 
   workers:
     container_name: ddns_workers
-    image: nelsontlima/ddns_workers:prod
+    image: nelsontlima/ddns_workers:${TAG}
+
     networks: [internal]
     restart: unless-stopped
     build:
@@ -85,7 +86,7 @@ services:
 
   postgres:
     container_name: ddns_db
-    image: nelsontlima/ddns_db:prod 
+    image: nelsontlima/ddns_db:${TAG}
     networks: [internal]
     restart: unless-stopped
     build:

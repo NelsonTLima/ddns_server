@@ -1,0 +1,17 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "semver2"
+version_provider = "npm"
+update_changelog_on_bump = true
+major_version_zero = true
+
+version_files = [
+  "packet.json",
+  "api/package.json",
+  "app/package.json",
+  "workers/packet.json",
+  "client/cargo.toml",
+  "shared/common/package.json",
+  "shared/internal/package.json"
+]
